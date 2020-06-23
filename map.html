@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+<link href="icon_R5b_icon.ico" rel="SHORTCUT ICON">
+<title>DAILYMAP</title>
+
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/css/bootstrap.min.css" integrity="sha384-PsH8R72JQ3SOdhVi3uxftmaW6Vc51MKb0q5P2rRUpPvrszuE4W1povHYgTpBfshb" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
+<script type="text/JavaScript">
+	$(function(){
+		// 幫 div.qa_title 加上 hover 及 click 事件
+		// 同時把兄弟元素 div.qa_content 隱藏起來
+		$('#qaContent ul.accordionPart li div.qa_title').hover(function(){
+			$(this).addClass('qa_title_on');
+		}, function(){
+			$(this).removeClass('qa_title_on');
+		}).click(function(){
+			// 當點到標題時，若答案是隱藏時則顯示它；反之則隱藏
+			$(this).next('div.qa_content').slideToggle();
+		}).siblings('div.qa_content').hide();
+	});
+</script>
+<style type="text/css">
+body {
+    background-color: #FFE699;
+}
+
+#top{
+width:100%;
+height:125px;
+background: linear-gradient(to right,#fbcd41,#e4b425,#876707);
+}
+
+#logo{
+float: left;
+margin: 10px 0px 0px 45px ;
+}
+
+#geome{
+float: right;
+margin: 20px 20px 0px 0px ;
+}
+
+#main{
+width:100%;
+}
+
+#map{
+float: left;
+width: 60%;
+height:750px;
+}
+
+input[type=text] {
+	border-color:#C4E1FF;
+    border-radius: 10px;
+	width: 90%;
+    font-size: 15px;
+	margin: 10px 0px 0px 10px ;
+    background-color: white;
+    padding: 5px 10px 5px 10px;
+}
+
+::-webkit-input-placeholder {
+    color: 	#BEBEBE;
+}
+
+#loading{
+    margin:8% 37%;
+}
+
+#search{
+float: left;
+width: 85%;
+}
+#search-icon-hi{
+margin: 12px 12px 0px 0px ;
+float: right;
+}
+
+#search-icon-hi:hover{
+	cursor: pointer;
+}
+
+ul{
+	padding: 3px 15px 0px 15px;
+	list-style: none;
+}
+#qaContent {
+	background-color: rgba(255, 255, 255, 0.7);
+	float: right;
+	width: 40%;
+}
+#qaContent ul.accordionPart li {
+	border-bottom: solid 4px white;
+	padding-bottom: 12px;
+	margin-top: 12px;
+
+}
+#qaContent ul.accordionPart li .qa_title {
+	width: 15%;
+	font-weight: bold;
+	padding-left: 28px;
+	color: #454b34;
+	cursor: pointer;
+	font-size: 28px;
+}
+#qaContent ul.accordionPart li .qa_title_on {
+	text-decoration: underline;
+}
+#qaContent ul.accordionPart li .qa_content {
+	padding-left: 28px;
+	color: #666;
+	font-size: 22px;
+}
+</style>
+</head>
+<body>
+    <div id="top">
+		<div id="logo">
+			<a href="https://ntustwebservicemap.azurewebsites.net/index.html">
+				<img src="assets/images/logo3.png" width="280" height="100"/>
+			</a>
+		</div>
+		<div id="geome">
+				<img src="assets/images/geome.png"  width="300" height="100">
+		</div>
+	</div>
+    <div id="loading" style="display:none">
+        <img src="assets/images/loading.gif" width="300px" height="300px"/>
+        <br/><br/><p style="margin-left: 105px; font-size: 25px; color:#FF6600">Loading....</p>
+    </div>
+	<div id="main">
+		<div id="qaContent">
+			<div id="center">
+				<form>
+					<input type="text" id="search" placeholder="Please give the address you are going to">
+					<a id="submit">
+						<img id="search-icon-hi" src="assets/images/search-icon-hi.png" width="30" height="30"/>
+					</a>
+				</form>
+			</div>
+			<ul class="accordionPart">
+				<li>
+					<div class="qa_title">Points</div>
+					<div class="qa_content" style="display: none;">
+						<p id="points"><span style="text-decoration: underline">Neighborhood</span> : </p>
+					</div>
+				</li>
+				<li>
+					<div class="qa_title">Lines</div>
+					<div class="qa_content" style="display: none;">
+						<p id="MRT"><span style="text-decoration: underline">MRT</span> : </p>
+						<p id="THSR"><span style="text-decoration: underline">THSR</span> : </p>
+						<p id="TRA"><span style="text-decoration: underline">TRA</span> : </p>
+						<p id="Fault"><span style="text-decoration: underline">Fault</span> : </p>
+					</div>
+				</li>
+				<li>
+					<div class="qa_title">Planes</div>
+					<div class="qa_content" style="display: none;">
+						<p id="liquefaction"><span style="text-decoration: underline">Soil Liquefaction Zone</span> :</p>
+						<p id="flood"><span style="text-decoration: underline">Flood Zone</span> :</p>
+					</div>
+				</li>
+			</ul>
+		</div>
+		<div id="map"></div><!-- 放MAP在這~~~~~~~~~~ -->
+	</div>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
+
+    <script>
+        $(document).ready(function(){
+            var theaddress = sessionStorage.getItem("theaddress");
+            if(theaddress!=null){
+                document.getElementById('search').value = theaddress;
+            }
+        })
+
+	var markers = [];
+    var markers2 = [];
+    var markerlatlng;
+
+    // 初始地圖
+    function initMap() {
+        var map = new google.maps.Map(document.getElementById('map'), {
+            zoom: 13, //地圖的縮放大小，範圍從0到21
+            center: { lat: 25.034563, lng: 121.556010 } //最初中心
+        });
+
+        var geocoder = new google.maps.Geocoder;
+        var infowindow = new google.maps.InfoWindow;
+
+        // map監聽
+        map.addListener('click', function(e) {
+            placeMarkerAndPanTo(geocoder, e.latLng, map);
+            clearFeature(map); // 清前一次圖層
+        });
+
+        // 搜尋(submit)監聽
+        document.getElementById('submit').addEventListener('click', function() {
+            if (msg()) {
+                clearFeature(map); // 清前一次圖層
+                addressORlatlng(geocoder, map, infowindow);
+            }
+        });
+
+        // 監聽input，當手動輸入地址，清除暫存
+        document.getElementById("search").addEventListener('keyup', function() {
+            markerlatlng = null;
+            map.setZoom(13); // 地圖恢復
+            map.setCenter(new google.maps.LatLng(25.034563, 121.556010));
+            clearMarkers();
+            clearFeature(map);
+        });
+
+    }
+
+    // 地圖上標記
+    function placeMarkerAndPanTo(geocoder, latLng, map) {
+        var latlng = latLng.toString().replace(/[()]/ig, "");
+        var latlngStr = latlng.split(',', 2);
+        var latlngM = { lat: +parseFloat(latlngStr[0]), lng: +parseFloat(latlngStr[1]) };
+        var marker = new google.maps.Marker({
+            position: latlngM,
+            map: map
+        });
+        markers.push(marker);
+        clearMarkers(); //清除前個標記
+
+
+        // 將點擊之經緯度轉成地址(如果不能轉就顯示經緯度)
+        $.ajax({
+            url: "https://maps.googleapis.com/maps/api/geocode/json?latlng=" + latlng,
+            method: "GET",
+            dataType: "json",
+            success: function(data) {
+                if (data.status == "OK") {
+                    var address = data.results[0].formatted_address;
+                    markerlatlng = latlng; // 儲存之後搜尋用
+                    //輸入列顯示
+                    document.getElementById('search').value = address.replace(/[()]/ig, ""); //把括號刪除
+                } else {
+                    document.getElementById('search').value = latLng.toString().replace(/[()]/ig, "");
+                }
+
+            },
+            error: function(err, status, errorThrown) {
+                console.log("Data: " + err + "\nStatus: " + status + "\nError: " + errorThrown);
+            }
+        });
+
+    }
+
+    // 清除標記
+    function clearMarkers() {
+        for (var i = 0; i <= markers2.length - 1; i++) {
+            markers2[i].setMap(null);
+        }
+        for (var i = 0; i < markers.length - 1; i++) {
+            markers[i].setMap(null);
+        }
+    }
+
+    // 判斷輸入為地址或座標
+    function addressORlatlng(geocoder, map, infowindow) {
+        var input = document.getElementById('search').value;
+        var latlngStr = input.split(',', 2);
+
+        // 判斷input為經緯度或地址
+        if (latlngStr.length == 2) {
+            var lat = parseFloat(latlngStr[0]);
+            var lng = parseFloat(latlngStr[1]);
+            geocodeLatLng(geocoder, map, infowindow, lat, lng);
+        } else if (latlngStr.length == 1) {
+            // 點擊地圖後搜尋的→使用點擊的經緯度
+            if (markerlatlng != null) {
+                var markerlatlngStr = markerlatlng.split(',', 2);
+                var lat = parseFloat(markerlatlngStr[0]);
+                var lng = parseFloat(markerlatlngStr[1]);
+                geocodeLatLng(geocoder, map, infowindow, lat, lng);
+            } else { // 自己輸入地址的
+                $.ajax({
+                    url: "https://maps.googleapis.com/maps/api/geocode/json?address=" + latlngStr,
+                    method: "GET",
+                    dataType: "json",
+                    success: function(data) {
+                        var lat = data.results[0].geometry.location.lat;
+                        var lng = data.results[0].geometry.location.lng;
+                        geocodeLatLng(geocoder, map, infowindow, lat, lng);
+                    },
+                    error: function(err, status, errorThrown) {
+                        console.log("Data: " + err + "\nStatus: " + status + "\nError: " + errorThrown);
+                    }
+                });
+            }
+        }
+    }
+
+    function msg(){
+        sessionStorage.clear();
+        if($("#search").val()==""){
+            alert("Please give the address");
+            return false;
+        }else{
+            return true;
+        }
+    }
+
+	// 座標→google map
+    function geocodeLatLng(geocoder, map, infowindow, lat, lng) {
+
+        document.getElementById("loading").style.display = "block";
+        document.getElementById("qaContent").style.display = "none";
+        document.getElementById("map").style.display = "none";
+
+        var latlng = { lat: +lat, lng: +lng };
+
+		// 面之判斷
+		var promise1 = $.ajax({
+			url: "https://ntustwebareaapi.azurewebsites.net/api/values?id=" + lng + "a" + lat,
+			method: "GET",
+			dataType: "json",
+			data: {},
+			success: function(data) {
+				//alert("plane");
+				if(data.SoilLiq_ID=="null"||data.SoilLiq_ID==null){
+                    $("#liquefaction").empty();
+					$("#liquefaction").append('<span style="text-decoration: underline">Soil Liquefaction Zone</span> : Not in a soil liquefaction zone.');
+				}
+				else{
+                    $("#liquefaction").empty();
+					$("#liquefaction").append('<span style="text-decoration: underline">Soil Liquefaction Zone</span> : Yes');
+				}
+				if(data.Flood_ID=="null"||data.Flood_ID==null){
+                    $("#flood").empty();
+					$("#flood").append('<span style="text-decoration: underline">Flood Zone</span> : Not in a flood zone.');
+				}
+				else{
+                    $("#flood").empty();
+					$("#flood").append('<span style="text-decoration: underline">Flood Zone</span> : Yes');
+				}
+				soilLiq = data.SoilLiq_P;
+                flood = data.Flood_P;
+                drawLayout(map, soilLiq, flood);
+			},
+			error: function(err, status, errorThrown) {
+				console.log("Data: " + err + "\nStatus: " + status + "\nError: " + errorThrown);
+			}
+		});
+
+		// 線之判斷
+		var promise2 = $.ajax({
+					url: "https://ntustweblineapi.azurewebsites.net/api/values?id=" + lng + "a" + lat,
+					method: "GET",
+					dataType: "json",
+					data: {},
+					success: function(data) {
+						//alert("line");
+						if(data.MRT_StationName=="null"||data.MRT_StationName==null){
+                            $("#MRT").empty();
+							$("#MRT").append('<span style="text-decoration: underline">MRT</span> :  No MRT station nearby.');
+						}
+						else{
+                            $("#MRT").empty();
+							$("#MRT").append('<span style="text-decoration: underline">MRT</span> : <strong>'+data.MRT_StationName+"</strong> station is <strong>"+data.MRT_LineDistance.substr(0,4)+" </strong> km far from here.");
+						}
+						if(data.THSR_StationName=="null"||data.THSR_StationName==null){
+                            $("#THSR").empty();
+							$("#THSR").append('<span style="text-decoration: underline">THSR</span> :  No THSR station nearby.');
+						}
+						else{
+                            $("#THSR").empty();
+							$("#THSR").append('<span style="text-decoration: underline">THSR</span> : <strong>'+data.THSR_StationName+"</strong> station is  <strong> "+data.THSR_LineDistance.substr(0,4)+" </strong> km far from here.");
+						}
+						if(data.TRA_StationName=="null"||data.TRA_StationName==null){
+                            $("#TRA").empty();
+							$("#TRA").append('<span style="text-decoration: underline">TRA</span> :  No TRA station nearby.');
+						}
+						else{
+                            $("#TRA").empty();
+							$("#TRA").append('<span style="text-decoration: underline">TRA</span> : <strong>'+data.TRA_StationName+"</strong> station is  <strong> "+data.TRA_StationDistance.substr(0,4)+" </strong> km far from here.");
+						}
+						if(data.Fault_Name=="null"||data.Fault_Name==null){
+                            $("#Fault").empty();
+							$("#Fault").append('<span style="text-decoration: underline">Fault</span> :  Not on a fault line.');
+						}
+						else{
+                            $("#Fault").empty();
+							$("#Fault").append('<span style="text-decoration: underline">Fault</span> : Yes! <strong>'+data.Fault_Name+"</strong> is  <strong> "+data.Fault_Distance.substr(0,4)+" </strong> km far from here.");
+						}
+						fault = data.Fault_Point;
+                		drawLine(map, fault);
+					},
+					error: function(err, status, errorThrown) {
+						console.log("Data: " + err + "\nStatus: " + status + "\nError: " + errorThrown);
+					}
+		});
+
+		// 點之判斷
+		var promise3 = $.ajax({
+						url: "https://ntustwebpointapi.azurewebsites.net/api/values?id="+ lng + "a" + lat,
+						method: "GET",
+						dataType: "json",
+						data: {},
+						success: function(data) {
+						//	alert("point");
+							var length = Object.keys(data).length;
+							if(length==0){
+                                $("#points").empty();
+								$("#points").append('<span style="text-decoration: underline">Neighborhood</span> : Empty area.');
+							}
+							else{
+								var str="";
+								for (var i=0 ; i<length-1; i++){
+									str = str + data[i].P_Name +" , ";
+								}
+								str = str + data[length-1].P_Name;
+                                $("#points").empty();
+								$("#points").append('<span style="text-decoration: underline">Neighborhood</span> : '+str);
+								//alert("point_finish");
+							}
+							for (var i = data.length - 1; i >= 0; i--) {
+                    			type = data[i].P_Type;
+                    			lat = data[i].P_Lat;
+                    			lng = data[i].P_Lng;
+                    			name = data[i].P_Name;
+                    			drawLocation(map, type, lat, lng, name);
+                			}
+						},
+						error: function(err, status, errorThrown) {
+								console.log("Data: " + err + "\nStatus: " + status + "\nError: " + errorThrown);
+						}
+		});
+
+        $.when(promise1, promise2, promise3).done(function(xhrObject1, xhrObject2, xhrObject3) {
+            document.getElementById("loading").style.display = "none";
+            document.getElementById("qaContent").style.display = "block";
+            document.getElementById("map").style.display = "block";
+            geocoder.geocode({ 'location': latlng }, function(results, status) {
+            if (status === 'OK') {
+                if (results[1]) {
+                    var marker = new google.maps.Marker({
+                        position: latlng,
+                        map: map
+                    });
+                    map.setZoom(16); // 地圖放大
+                    map.panTo(latlng); // 以此為中心
+                    markers.push(marker);
+                    infowindow.setContent(results[1].formatted_address); //小方框地址
+                    infowindow.setOptions({maxWidth:500});
+                    infowindow.open(map, marker); //小方框開啟
+                } else {
+                    window.alert('No results found');
+                }
+            } else {
+                window.alert('Geocoder failed due to: ' + status);
+            }
+        });
+        });
+	}
+
+    // 畫圖層
+    function drawLayout(map, soilLiq, flood) {
+
+        // 土壤液化
+        if (soilLiq != null) {
+            map.data.setStyle(function(feature) {
+                var color = 'brown';
+                if (feature.getProperty('isColorful')) {
+                    color = feature.getProperty('color');
+                }
+                feature.setProperty('isColorful', true);
+                return /** @type {google.maps.Data.StyleOptions} */ ({
+                    fillColor: color,
+                    fillOpacity: 0.5, //圖的透明度 0~1
+                    strokeWeight: 1, //框的粗細
+                    strokeColor: color, //框的顏色
+                    strokeOpacity: 0.5 //框的透明度 0~1
+                });
+            });
+
+            soilLiq.push(soilLiq[0]); // 第一個點和最後一個要相同
+            var jsonData = {
+                "type": "FeatureCollection",
+                "features": [{
+                    "type": "Feature",
+                    "properties": {
+                        "color": "brown"
+                    },
+                    "geometry": {
+                        "type": "Polygon",
+                        "coordinates": [soilLiq]
+                    }
+                }]
+            };
+            map.data.addGeoJson(jsonData);
+        }
+
+        // 淹水區
+        if (flood != null) {
+            map.data.setStyle(function(feature) {
+                var color = 'blue';
+                if (feature.getProperty('isColorful')) {
+                    color = feature.getProperty('color');
+                }
+                feature.setProperty('isColorful', true);
+                return /** @type {google.maps.Data.StyleOptions} */ ({
+                    fillColor: color,
+                    fillOpacity: 0.5, //圖的透明度 0~1
+                    strokeWeight: 1, //框的粗細
+                    strokeColor: color, //框的顏色
+                    strokeOpacity: 0.4 //框的透明度 0~1
+                });
+            });
+
+            flood.push(flood[0]); // 第一個點和最後一個要相同
+            var jsonData = {
+                "type": "FeatureCollection",
+                "features": [{
+                    "type": "Feature",
+                    "properties": {
+                        "color": "blue"
+                    },
+                    "geometry": {
+                        "type": "Polygon",
+                        "coordinates": [flood]
+                    }
+                }]
+            };
+            map.data.addGeoJson(jsonData);
+        }
+
+        /*// 當滑鼠滑到此區上方，會框起來
+        map.data.addListener('mouseover', function(event) {
+            map.data.revertStyle();
+            map.data.overrideStyle(event.feature, { strokeColor: "yellow", strokeWeight: 4, strokeOpacity: 0.8 });
+        });
+        map.data.addListener('mouseout', function(event) {
+            map.data.revertStyle();
+        });*/
+    }
+
+    // 清除圖層
+    function clearFeature(map) {
+        map.data.forEach(function(feature) {
+            map.data.remove(feature);
+        });
+    }
+
+    // 畫線
+    function drawLine(map, fault) {
+
+        // 斷層
+        if (fault != null) {
+            map.data.setStyle(function(feature) {
+                var color = 'red';
+                var strokeWeight = 6;
+                if (feature.getProperty('isColorful')) {
+                    color = feature.getProperty('color');
+                    strokeWeight = feature.getProperty('strokeWeight');
+                }
+                feature.setProperty('isColorful', true);
+                return /** @type {google.maps.Data.StyleOptions} */ ({
+                    fillColor: color,
+                    fillOpacity: 0.5, //圖的透明度 0~1
+                    strokeWeight: strokeWeight, //框的粗細
+                    strokeColor: color, //框的顏色
+                    strokeOpacity: 0.4 //框的透明度 0~1
+                });
+            });
+
+            var jsonData = {
+                "type": "FeatureCollection",
+                "features": [{
+                    "type": "Feature",
+                    "properties": {
+                        "color": "red"
+                    },
+                    "geometry": {
+                        "type": "LineString",
+                        "coordinates": fault
+                    }
+                }]
+            };
+            map.data.addGeoJson(jsonData);
+        }
+    }
+
+    // 畫地點
+    function drawLocation(map, type, lat, lng, name) {
+
+        var latlng = { lat: +lat, lng: +lng };
+        var icon = "";
+        if (type == "A001" || type == "A002" || type == "A003") { //學校
+            icon = "assets/images/school.png";
+        } else if (type == "A004") { //圖書館
+            icon = "assets/images/library.png";
+        } else if (type == "E001") { //運動中心
+            icon = "assets/images/gym.png";
+        } else if (type == "E002") { //公園
+            icon = "assets/images/park.png";
+        } else if (type == "L001") { //大賣場
+            icon = "assets/images/grocery.png";
+        } else if (type == "L002") { //百貨公司
+            icon = "assets/images/department_store.png";
+        } else if (type == "L003") { //郵局
+            icon = "assets/images/post_office.png";
+        } else if (type == "L004") { //醫院
+            icon = "assets/images/hospital.png";
+        } else if (type == "B001") { //加油站
+            icon = "assets/images/gas_station.png";
+        } else if (type == "B002") { //焚化廠
+            icon = "assets/images/burn.png";
+        } else if (type == "B003") { //殯葬處
+            icon = "assets/images/death.png";
+        }
+
+        var image = {
+            url: icon,
+            scaledSize: new google.maps.Size(45, 45)
+        };
+
+        var marker = new google.maps.Marker({
+            position: latlng,
+            map: map,
+            icon: image,
+            title: name
+        });
+        markers2.push(marker);
+    }
+    </script>
+    <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAjnaGjZr3BKdRE6bjhZBL6iTt7TsWcdbw&callback=initMap">
+    // API金鑰(key)&使用類型(js)&回饋
+    </script>
+</body>
+</body>
+</html>

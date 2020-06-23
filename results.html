@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="zh-tw" class="gr__demonstration_abgne_tw">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<meta http-equiv="Content-Script-Type" content="text/javascript">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<script type="text/javascript" src="https://code.jquery.com/jquery-latest.min.js"></script>
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/css/bootstrap.min.css" integrity="sha384-PsH8R72JQ3SOdhVi3uxftmaW6Vc51MKb0q5P2rRUpPvrszuE4W1povHYgTpBfshb" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<link href="icon_R5b_icon.ico" rel="SHORTCUT ICON">
+
+<title>DAILYMAP</title>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
+<script type="text/JavaScript">
+	$(function(){
+		// 幫 div.qa_title 加上 hover 及 click 事件
+		// 同時把兄弟元素 div.qa_content 隱藏起來
+		$('#qaContent ul.accordionPart li div.qa_title').hover(function(){
+			$(this).addClass('qa_title_on');
+		}, function(){
+			$(this).removeClass('qa_title_on');
+		}).click(function(){
+			// 當點到標題時，若答案是隱藏時則顯示它；反之則隱藏
+			$(this).next('div.qa_content').slideToggle();
+		}).siblings('div.qa_content').hide();
+	});
+</script>
+
+<style type="text/css">
+body {
+    background-color: #FFFFFF;
+}
+
+#top{
+width:100%;
+height:125px;
+background: linear-gradient(to right,#fbcd41,#e4b425,#876707);
+}
+
+#logo{
+float: left;
+margin: 10px 0px 0px 45px ;
+}
+
+#geome{
+float: right;
+margin: 20px 20px 0px 0px ;
+}
+
+
+#address_all{
+margin: 45px 62px 0px 63px;
+padding: 0px 15px 0px 10px;
+font-size: 28px;
+color:white;
+background-color: #31381E;
+border-radius: 5px;
+width: 87%;
+}
+
+#address{
+font-weight: bold;
+font-size: 28px;
+}
+
+ul{
+	margin: 0;
+	padding: 3px 15px 0px 15px;
+	list-style: none;
+	background-color: rgba(255, 255, 255, 0.7);
+	border-radius: 10px;
+}
+#qaContent {
+	margin: 40px 50px 50px 30px;
+	width: 90%;
+}
+
+#qaContent ul.accordionPart {
+	margin: 10px 10px 50px 30px;
+}
+#qaContent ul.accordionPart li {
+	border-bottom: solid 4px white;
+	padding-bottom: 12px;
+	margin-top: 12px;
+}
+#qaContent ul.accordionPart li .qa_title {
+	width: 15%;
+	font-weight: bold;
+	padding-left: 28px;
+	color: #454b34;
+	cursor: pointer;
+	font-size: 26px;
+}
+#qaContent ul.accordionPart li .qa_title_on {
+	text-decoration: underline;
+}
+#qaContent ul.accordionPart li .qa_content {
+	margin: 6px 0 0;
+	padding-left: 28px;
+	color: #666;
+	font-size: 22px;
+}
+
+table {
+	border-spacing: 2px;
+	margin:10px 0px 0px 0px;
+    width: 100%;
+}
+#loading{
+	margin:8% 37%;
+}
+#footer{
+padding: 5px 0px;
+width:100%;
+margin:20px auto;
+}
+</style>
+</head>
+
+<body>
+
+    <div id="top">
+		<div id="logo">
+			<a href="https://ntustwebservicemap.azurewebsites.net/index.html">
+				<img src="assets/images/logo3.png" width="280" height="100"/>
+			</a>
+		</div>
+		<div id="geome">
+				<img src="assets/images/geome.png"  width="300" height="100">
+		</div>
+	</div>
+	<div id="loading" style="display:block">
+		<img src="assets/images/loading.gif" width="300px" height="300px"/>
+		<br/><br/><p style="margin-left: 105px; font-size: 25px; color:#FF6600">Loading....</p>
+	</div>
+	<div id="address_all">
+		<p id="adress">The address :</p>
+	</div>
+	<div id="qaContent">
+		<ul class="accordionPart">
+			<li>
+				<div class="qa_title">Points</div>
+				<div class="qa_content" style="display: none;">
+					<p id="points"><span style="text-decoration: underline">Neighborhood</span> : </p>
+				</div>
+			</li>
+			<li>
+				<div class="qa_title">Lines</div>
+				<div class="qa_content" style="display: none;">
+					<p id="MRT"><span style="text-decoration: underline">MRT</span> : </p>
+					<p id="THSR"><span style="text-decoration: underline">THSR</span> : </p>
+					<p id="TRA"><span style="text-decoration: underline">TRA</span> : </p>
+					<p id="Fault"><span style="text-decoration: underline">Fault</span> : </p>
+				</div>
+			</li>
+			<li>
+				<div class="qa_title">Planes</div>
+				<div class="qa_content" style="display: none;">
+					<p id="liquefaction"><span style="text-decoration: underline">Soil Liquefaction Zone</span> :</p>
+					<p id="flood"><span style="text-decoration: underline">Flood Zone</span> : </p>
+				</div>
+			</li>
+		</ul>
+	</div>
+
+	<footer id="footer" style="text-align:center; font-size: 28px; font-weight: bold">
+        <p> <span style="color:#FF6600">DAILYMAP</span> cares about your daily motion <i class="fa fa-heart"style="color:#FF6600"></i></p>
+    </footer>
+
+<script>
+	$(document).ready($(function () {
+		var theaddress = sessionStorage.getItem("theaddress");
+		$("#adress").append(" "+theaddress);
+		//alert(sessionStorage.getItem("theaddress"));
+		//alert(typeof(sessionStorage.getItem("theaddress")));
+
+		document.getElementById("top").style.display = "none";
+		document.getElementById("address_all").style.display = "none";
+		document.getElementById("qaContent").style.display = "none";
+		document.getElementById("footer").style.display = "none";
+	}));
+	$(document).ready($(function () {
+		var promise1 = $.ajax({
+			url: "https://ntustwebareaapi.azurewebsites.net/api/values?id="+ sessionStorage.getItem("theaddress"),
+			method: "GET",
+			dataType: "json",
+			data: {},
+			success: function(data) {
+				//alert("plane");
+				if(data.SoilLiq_ID=="null"||data.SoilLiq_ID==null){
+					$("#liquefaction").append(" Not in a soil liquefaction zone.");
+				}
+				else{
+					$("#liquefaction").append(" Yes");
+				}
+				if(data.Flood_ID=="null"||data.Flood_ID==null){
+					$("#flood").append(" Not in a flood zone.");
+				}
+				else{
+					$("#flood").append(" Yes");
+				}
+			},
+			error: function(err, status, errorThrown) {
+				console.log("Data: " + err + "\nStatus: " + status + "\nError: " + errorThrown);
+			}
+		});
+		var promise2 = $.ajax({
+					url: "https://ntustweblineapi.azurewebsites.net/api/values?id="+sessionStorage.getItem("theaddress"),
+					method: "GET",
+					dataType: "json",
+					data: {},
+					success: function(data) {
+						//alert("line");
+						if(data.MRT_StationName=="null"||data.MRT_StationName==null){
+							$("#MRT").append(" No MRT station nearby.");
+						}
+						else{
+							$("#MRT").append("<strong>"+data.MRT_StationName+"</strong> station is <strong>"+data.MRT_LineDistance.substr(0,4)+" </strong> km far from here.");
+						}
+						if(data.THSR_StationName=="null"||data.THSR_StationName==null){
+							$("#THSR").append(" No THSR station nearby.");
+						}
+						else{
+							$("#THSR").append("<strong>"+data.THSR_StationName+"</strong> station is  <strong> "+data.THSR_LineDistance.substr(0,4)+" </strong> km far from here.");
+						}
+						if(data.TRA_StationName=="null"||data.TRA_StationName==null){
+							$("#TRA").append(" No TRA station nearby.");
+						}
+						else{
+							$("#TRA").append("<strong>"+data.TRA_StationName+"</strong> station is  <strong> "+data.TRA_StationDistance.substr(0,4)+" </strong> km far from here.");
+						}
+						if(data.Fault_Name=="null"||data.Fault_Name==null){
+							$("#Fault").append(" Not on a fault line.");
+						}
+						else{
+							$("#Fault").append("Yes! <strong>"+data.Fault_Name+"</strong> is  <strong> "+data.Fault_Distance.substr(0,4)+" </strong> km far from here.");
+						}
+					},
+					error: function(err, status, errorThrown) {
+						console.log("Data: " + err + "\nStatus: " + status + "\nError: " + errorThrown);
+					}
+		});
+		var promise3 = $.ajax({
+						url: "https://ntustwebpointapi.azurewebsites.net/api/values?id="+sessionStorage.getItem("theaddress"),
+						method: "GET",
+						dataType: "json",
+						data: {},
+						success: function(data) {
+							var length = Object.keys(data).length;
+							if(length==0){
+								$("#points").append("Empty area.");
+							}
+							else{
+								var str="";
+								for (var i=0 ; i<length-1;i++){
+									str = str + data[i].P_Name +" , ";
+								}
+								str = str + data[length-1].P_Name;
+								$("#points").append(str);
+							}
+						},
+						error: function(err, status, errorThrown) {
+								console.log("Data: " + err + "\nStatus: " + status + "\nError: " + errorThrown);
+						}
+		});
+		$.when(promise1, promise2, promise3).done(function(xhrObject1, xhrObject2, xhrObject3) {
+			document.getElementById("loading").style.display = "none";
+			document.body.style.backgroundColor="#FFE699";
+			document.getElementById("top").style.display = "block";
+			document.getElementById("address_all").style.display = "block";
+			document.getElementById("qaContent").style.display = "block";
+			document.getElementById("footer").style.display = "block";
+		});
+	}));
+
+</script>
+</body>
+</html>
