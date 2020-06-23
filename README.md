@@ -8,4 +8,6 @@ The information that the system provides covers three aspects: point, line and p
 
 *Plane: Due to the global warming and overdeveloping, we think people should be more aware of the geographical features of the location they are willing to dwell in. Users could know whether the location is built in a soil liquefaction zone and a flood zone by simply inputting the accurate address or coordinates to the system.
 
-For more information, please check out the System Description document
+For more information, please check out the System Description document.
+
+Here only provides the front-end parts.
